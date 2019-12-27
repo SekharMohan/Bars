@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="RatingBarView">
+        <attr name="total_unit" format="integer"/>
+        <attr name="bar_color" format="color"/>
+        <attr name="bar_selected_color" format="color"/>
+        <attr name="selected_unit" format="integer"/>
+        <attr name="bar_margin" format="dimension"/>
+        <attr name="divider_margin" format="dimension"/>
+        <attr name="lefAligned" format="boolean"/>
+        <attr name="line_stroke" format="dimension"/>
+        <attr name="divider_stroke" format="dimension"/>
+    </declare-styleable>
+</resources>
