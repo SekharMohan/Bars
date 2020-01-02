@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+<dimen name="draw_path_margin">18dp</dimen>
     <declare-styleable name="RatingBarView">
         <attr name="total_unit" format="integer"/>
         <attr name="bar_color" format="color"/>

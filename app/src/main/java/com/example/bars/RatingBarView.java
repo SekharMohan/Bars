@@ -25,6 +25,10 @@ public class RatingBarView extends View {
     private float lineLength;
     private float dividerLineWidth;
     private float viewDivider;
+    private float linePathMargin;
+
+    private int totalUnit;
+    private int selectedUnit;
 
 
     private boolean isLeftAligned;
@@ -46,26 +50,35 @@ public class RatingBarView extends View {
     }
 
     private void init(AttributeSet attrs) {
-
         if(attrs != null && attrs.getAttributeCount() > 0) {
             TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.RatingBarView);
-
+            linePathMargin = getResources().getDimension(R.dimen.draw_path_margin);
             path = new Path();
             linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            linePaint.setAntiAlias(true);
             linePaint.setColor(typedArray.getColor(R.styleable.RatingBarView_bar_color, Color.GRAY));
             linePaint.setStrokeWidth(typedArray.getDimension(R.styleable.RatingBarView_line_stroke, 1));
+            linePaint.setStyle(Paint.Style.STROKE);
+
             lineSelectedPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            lineSelectedPaint.setAntiAlias(true);
             lineSelectedPaint.setColor(typedArray.getColor(R.styleable.RatingBarView_bar_selected_color, Color.BLACK));
-            lineSelectedPaint.setStrokeWidth(typedArray.getDimension(R.styleable.RatingBarView_divider_stroke, 2));
+            lineSelectedPaint.setStrokeWidth(typedArray.getDimension(R.styleable.RatingBarView_divider_stroke, 1));
+            lineSelectedPaint.setStyle(Paint.Style.STROKE);
+
             isLeftAligned = typedArray.getBoolean(R.styleable.RatingBarView_lefAligned, false);
 
             linePathPaint = new Paint();
+            linePathPaint.setAntiAlias(true);
             linePathPaint.setColor(typedArray.getColor(R.styleable.RatingBarView_bar_color, Color.GRAY));
-            linePathPaint.setStrokeWidth(typedArray.getDimension(R.styleable.RatingBarView_line_stroke, 1));
+            linePathPaint.setStrokeWidth(typedArray.getDimension(R.styleable.RatingBarView_line_stroke, 2));
             linePathPaint.setStyle(Paint.Style.STROKE);
 
             viewOffset = typedArray.getDimension(R.styleable.RatingBarView_bar_margin, 8);
             dividerOffset = typedArray.getDimension(R.styleable.RatingBarView_divider_margin, 25);
+
+            totalUnit = typedArray.getInteger(R.styleable.RatingBarView_total_unit, 100);
+            selectedUnit = typedArray.getInteger(R.styleable.RatingBarView_selected_unit, 40);
 
             typedArray.recycle();
         }
@@ -74,20 +87,19 @@ public class RatingBarView extends View {
     private void measureView() {
         width = getWidth();
         height = getHeight();
-        xPos = isLeftAligned? 0 : dividerOffset;
-        yPos = viewOffset;
+        yPos = height-viewOffset;
 
 if(isLeftAligned) {
-    lineLength = width-50;
-    viewDivider = lineLength + dividerOffset;
+    lineLength = width -dividerOffset;
     dividerLineWidth = lineLength+dividerOffset;
+    viewDivider = dividerLineWidth;
     xPos = 0;
 
 } else {
     lineLength = width;
     xPos = dividerOffset;
-    viewDivider = 0;
     dividerLineWidth = lineLength;
+    viewDivider = 0;
 
 }
     }
@@ -107,20 +119,22 @@ if(isLeftAligned) {
     }
 
     private void drawLine(Canvas canvas) {
-        int count = 100;
 
 
-        for(int i = 1; i <= count; i++) {
 
-            canvas.drawLine(xPos, yPos, lineLength, yPos, linePaint);
-            if( i % 10 == 0) {
+        for(int i = 1; i <= totalUnit; i++) {
+
+            canvas.drawLine(xPos, yPos, lineLength, yPos, i<=selectedUnit?lineSelectedPaint:linePaint);
+            if( i % 10 == 0 ) {
                 drawViewLeftDivider(canvas, viewDivider, yPos);
-                yPos = yPos + viewOffset;
-                canvas.drawLine(0, yPos, dividerLineWidth, yPos, lineSelectedPaint);
+                if(i != totalUnit) {
+                    yPos = yPos - viewOffset;
+                    canvas.drawLine(0, yPos, dividerLineWidth, yPos, linePathPaint);
+                }
 
             }
 
-            yPos =  yPos + viewOffset;
+            yPos =  yPos - viewOffset;
 
 
 
@@ -128,8 +142,8 @@ if(isLeftAligned) {
         }
     }
 
-    public void setAnimation() {
-        linePaint.setColor(Color.GREEN);
+    public void setSelectedUnit(int selectedUnit) {
+        this.selectedUnit = selectedUnit;
         measureView();
         postInvalidate();
     }
@@ -138,14 +152,14 @@ if(isLeftAligned) {
     private void drawViewLeftDivider(Canvas canvas, float x, float y) {
         path.moveTo(x, y);
         if(isLeftAligned) {
-            path.lineTo(x - 20, y);
-            path.lineTo(x - 20, y - 9 * viewOffset);
-            path.lineTo(x, y - 9 * viewOffset);
+            path.lineTo(x - linePathMargin, y);
+            path.lineTo(x - linePathMargin, y + 9 * viewOffset);
+            path.lineTo(x, y + 9 * viewOffset);
         } else {
 
-            path.lineTo(x +20, y);
-            path.lineTo(x +20, y - 9 * viewOffset);
-            path.lineTo(x, y - 9 * viewOffset);
+            path.lineTo(x +linePathMargin, y);
+            path.lineTo(x +linePathMargin, y + 9 * viewOffset);
+            path.lineTo(x, y + 9 * viewOffset);
         }
         canvas.drawPath(path, linePathPaint);
     }
